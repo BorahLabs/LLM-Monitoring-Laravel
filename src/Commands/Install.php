@@ -24,11 +24,11 @@ class Install extends Command
         }
 
         $modelsPath = app_path('Models');
-        $this->info('Copying LLMPortCall model to ' . $modelsPath);
-        File::copy(__DIR__ . '/../Models/LLMPortCall.php.stub', $modelsPath . '/LLMPortCall.php');
+        $this->info('Copying LLMPortCall model to '.$modelsPath);
+        File::copy(__DIR__.'/../Models/LLMPortCall.php.stub', $modelsPath.'/LLMPortCall.php');
 
         $listenerPath = app_path('Listeners/LLMPort');
-        $this->info('Creating LLMPort listener directory at ' . $listenerPath);
+        $this->info('Creating LLMPort listener directory at '.$listenerPath);
         File::makeDirectory($listenerPath, recursive: true, force: true);
 
         if (confirm('Do you want to create a monitoring Filament panel?', default: true)) {
@@ -48,8 +48,8 @@ class Install extends Command
             'Which Filament panel do you want to use?',
             $allPanels
                 ->mapWithKeys(fn (\Filament\Panel|string $panel, mixed $key) => is_string($panel) ?
-                    [ $key => $panel ] :
-                    [ $panel->getId() => $panel->getId() ]
+                    [$key => $panel] :
+                    [$panel->getId() => $panel->getId()]
                 )
                 ->all()
         );
@@ -79,7 +79,6 @@ class Install extends Command
         $path = (count($resourceDirectories) > 1) ?
             $resourceDirectories[array_search($namespace, $resourceNamespaces)] :
             (Arr::first($resourceDirectories) ?? app_path('Filament/Resources/'));
-
 
         dd($path, $namespace);
     }
