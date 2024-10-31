@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Borah\LLMMonitoring\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LLMMonitoringCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'llm-monitoring-laravel';
 
     public $description = 'My command';
 
