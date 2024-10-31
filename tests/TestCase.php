@@ -2,9 +2,9 @@
 
 namespace Borah\LLMMonitoring\Tests;
 
+use Borah\LLMMonitoring\LLMMonitoringServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Borah\LLMMonitoring\LLMMonitoringServiceProvider;
 
 class TestCase extends Orchestra
 {

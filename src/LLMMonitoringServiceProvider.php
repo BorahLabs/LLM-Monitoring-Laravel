@@ -2,9 +2,9 @@
 
 namespace Borah\LLMMonitoring;
 
+use Borah\LLMMonitoring\Commands\Install;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Borah\LLMMonitoring\Commands\LLMMonitoringCommand;
 
 class LLMMonitoringServiceProvider extends PackageServiceProvider
 {
@@ -18,8 +18,7 @@ class LLMMonitoringServiceProvider extends PackageServiceProvider
         $package
             ->name('llm-monitoring-laravel')
             ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_llm_monitoring_laravel_table')
-            ->hasCommand(LLMMonitoringCommand::class);
+            ->hasCommands(Install::class)
+            ->hasMigration('create_llm_port_calls_table');
     }
 }

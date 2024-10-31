@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Listeners\LLMPort;
+
+use App\Models\LLMPortCall;
+use Borah\LLMPort\Events\LLMChatResponseReceived;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+
+class CreateLLMPortCall implements ShouldQueue
+{
+    use InteractsWithQueue;
+
+    /**
+     * Create the event listener.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     */
+    public function handle(LLMChatResponseReceived $event): void
+    {
+        LLMPortCall::create([
+            'driver' => $event->driver,
+            'model_name' => $event->model->name,
+            'messages' => $event->request->messages,
+            'response' => $event->response->content,
+            'temperature' => $event->request->temperature,
+            'top_p' => $event->request->topP,
+            'frequency_penalty' => $event->request->frequencyPenalty,
+            'finish_reason' => $event->response->finishReason,
+            'processing_time_in_ms' => $event->response->usage?->processingTimeInMs,
+            'input_tokens' => $event->response->usage?->inputTokens,
+            'output_tokens' => $event->response->usage?->outputTokens,
+        ]);
+    }
+}
