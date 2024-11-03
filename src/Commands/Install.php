@@ -5,7 +5,6 @@ namespace Borah\LlmMonitoring\Commands;
 use Borah\LlmMonitoring\LlmMonitoringServiceProvider;
 use Filament\Facades\Filament;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 use function Laravel\Prompts\confirm;
@@ -24,11 +23,11 @@ class Install extends Command
         }
 
         $modelsPath = app_path('Models');
-        $this->info('Copying LlmPortCall model to ' . $modelsPath);
-        File::copy(__DIR__ . '/../Models/LlmPortCall.php.stub', $modelsPath . '/LlmPortCall.php');
+        $this->info('Copying LlmPortCall model to '.$modelsPath);
+        File::copy(__DIR__.'/../Models/LlmPortCall.php.stub', $modelsPath.'/LlmPortCall.php');
 
         $listenerPath = app_path('Listeners/LlmPort');
-        $this->info('Creating LlmPort listener directory at ' . $listenerPath);
+        $this->info('Creating LlmPort listener directory at '.$listenerPath);
         File::makeDirectory($listenerPath, recursive: true, force: true);
 
         if (confirm('Do you want to create a monitoring Filament panel?', default: true)) {
@@ -47,7 +46,7 @@ class Install extends Command
         $panelId = select(
             'Which Filament panel do you want to use?',
             $allPanels
-                ->mapWithKeys(fn (\Filament\Panel $panel) => [ $panel->getId() => $panel->getId() ])
+                ->mapWithKeys(fn (\Filament\Panel $panel) => [$panel->getId() => $panel->getId()])
                 ->all()
         );
 
