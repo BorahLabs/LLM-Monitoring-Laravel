@@ -1,5 +1,5 @@
 <?php
 
-use Borah\LLMMonitoring\Tests\TestCase;
+use Borah\LlmMonitoring\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

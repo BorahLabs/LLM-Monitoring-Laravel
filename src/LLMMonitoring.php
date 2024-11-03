@@ -1,5 +1,5 @@
 <?php
 
-namespace Borah\LLMMonitoring;
+namespace Borah\LlmMonitoring;
 
-class LLMMonitoring {}
+class LlmMonitoring {}

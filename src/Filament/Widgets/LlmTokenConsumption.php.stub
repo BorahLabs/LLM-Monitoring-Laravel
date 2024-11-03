@@ -1,0 +1,75 @@
+<?php
+
+namespace {namespace}\LlmMonitoring\Widgets;
+
+use App\Models\LlmPortCall;
+use Filament\Support\RawJs;
+use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Flowframe\Trend\Trend;
+use Flowframe\Trend\TrendValue;
+
+class LlmTokenConsumption extends ChartWidget
+{
+    use InteractsWithPageFilters;
+
+    protected static ?int $sort = 3;
+
+    protected static ?string $heading = 'Llm Token Consumption';
+
+    protected function getData(): array
+    {
+        $inputTokens = $this->getQuery()->perDay()->sum('input_tokens');
+        $outputTokens = $this->getQuery()->perDay()->sum('output_tokens');
+
+        return [
+            'datasets' => [
+                [
+                    'label' => 'Input Tokens',
+                    'data' => $inputTokens->map(fn (TrendValue $value) => $value->aggregate),
+                    'backgroundColor' => '#fde68a',
+                    'borderColor' => '#fde68a',
+                ],
+                [
+                    'label' => 'Output Tokens',
+                    'data' => $outputTokens->map(fn (TrendValue $value) => $value->aggregate),
+                    'backgroundColor' => '#bfdbfe',
+                    'borderColor' => '#bfdbfe',
+                ],
+            ],
+            'labels' => $inputTokens->map(fn (TrendValue $value) => $value->date),
+        ];
+    }
+
+    protected function getOptions(): array|RawJs|null
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'min' => 0,
+                ],
+            ],
+        ];
+    }
+
+    protected function getType(): string
+    {
+        return 'line';
+    }
+
+    protected function getQuery()
+    {
+        $startDate = $this->filters['startDate'] ?? null;
+        $endDate = $this->filters['endDate'] ?? null;
+
+        $data = Trend::model(LlmPortCall::class);
+        if ($startDate || $endDate) {
+            $data = $data->between(
+                start: $startDate ? now()->parse($startDate) : now()->startOfCentury(),
+                end: $endDate ? now()->parse($endDate)->endOfDay() : today()->endOfDay(),
+            );
+        }
+
+        return $data;
+    }
+}

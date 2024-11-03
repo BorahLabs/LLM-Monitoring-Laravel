@@ -39,7 +39,7 @@ php artisan vendor:publish --tag="llm-monitoring-laravel-views"
 ## Usage
 
 ```php
-$lLMMonitoring = new Borah\LLMMonitoring();
+$lLMMonitoring = new Borah\LlmMonitoring();
 echo $lLMMonitoring->echoPhrase('Hello, Borah!');
 ```
 

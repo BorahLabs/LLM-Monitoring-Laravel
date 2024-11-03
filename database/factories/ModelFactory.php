@@ -1,6 +1,6 @@
 <?php
 
-namespace Borah\LLMMonitoring\Database\Factories;
+namespace Borah\LlmMonitoring\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

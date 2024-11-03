@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Filament\LlmMonitoring\Widgets\LlmCallsChart;
+use App\Filament\LlmMonitoring\Widgets\LlmStats;
+use App\Filament\LlmMonitoring\Widgets\LlmTokenConsumption;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Pages\Dashboard as Page;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+
+class LlmDashboard extends Page
+{
+    use HasFiltersForm;
+
+    protected static string $routePath = '/llm-token-usage';
+
+    protected static ?string $navigationGroup = 'LLM Monitoring';
+
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
+    protected static ?string $navigationLabel = 'Token Usage';
+
+    protected ?string $heading = 'Token Usage';
+
+    public function mount(): void
+    {
+        $this->filtersForm->fill();
+    }
+
+    public function filtersForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\DatePicker::make('startDate')
+                            ->default(now()->subDays(30)),
+                        Forms\Components\DatePicker::make('endDate'),
+                    ])
+                    ->columns(3),
+            ]);
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            LlmStats::class,
+            LlmCallsChart::class,
+            LlmTokenConsumption::class,
+        ];
+    }
+}

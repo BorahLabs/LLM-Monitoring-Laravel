@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Listeners\LLMPort;
+namespace App\Listeners\LlmPort;
 
-use App\Models\LLMPortCall;
-use Borah\LLMPort\Events\LLMChatResponseReceived;
+use App\Models\LlmPortCall;
+use Borah\LlmPort\Events\LlmChatResponseReceived;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class CreateLLMPortCall implements ShouldQueue
+class CreateLlmPortCall implements ShouldQueue
 {
     use InteractsWithQueue;
 
@@ -22,9 +22,9 @@ class CreateLLMPortCall implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(LLMChatResponseReceived $event): void
+    public function handle(LlmChatResponseReceived $event): void
     {
-        LLMPortCall::create([
+        LlmPortCall::create([
             'driver' => $event->driver,
             'model_name' => $event->model->name,
             'messages' => $event->request->messages,

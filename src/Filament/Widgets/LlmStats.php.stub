@@ -1,0 +1,32 @@
+<?php
+
+namespace {namespace}\LlmMonitoring\Widgets;
+
+use App\Models\LlmPortCall;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
+
+class LlmStats extends BaseWidget
+{
+    use InteractsWithPageFilters;
+
+    protected static ?int $sort = 1;
+
+    protected function getStats(): array
+    {
+        $startDate = $this->filters['startDate'] ?? null;
+        $endDate = $this->filters['endDate'] ?? null;
+
+        $query = LlmPortCall::query()
+            ->when($startDate, fn (Builder $query) => $query->whereDate('created_at', '>=', $startDate))
+            ->when($endDate, fn (Builder $query) => $query->whereDate('created_at', '<=', $endDate));
+
+        return [
+            Stat::make('Total Calls', $query->clone()->count()),
+            Stat::make('Input tokens', $query->clone()->sum('input_tokens')),
+            Stat::make('Output tokens', $query->clone()->sum('output_tokens')),
+        ];
+    }
+}

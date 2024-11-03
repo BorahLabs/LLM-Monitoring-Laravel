@@ -1,12 +1,12 @@
 <?php
 
-namespace Borah\LLMMonitoring;
+namespace Borah\LlmMonitoring;
 
-use Borah\LLMMonitoring\Commands\Install;
+use Borah\LlmMonitoring\Commands\Install;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class LLMMonitoringServiceProvider extends PackageServiceProvider
+class LlmMonitoringServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {

@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
-use Borah\LLMPort\Drivers\LlmProvider;
-use Borah\LLMPort\Facades\LLMPort;
+use Borah\LlmPort\Drivers\LlmProvider;
+use Borah\LlmPort\Facades\LlmPort;
 use Illuminate\Database\Eloquent\Model;
 
-class LLMPortCall extends Model
+class LlmPortCall extends Model
 {
     protected $table = 'llm_port_calls';
 
     protected $guarded = [];
 
+    protected $casts = [
+        'messages' => 'array',
+    ];
+
     public function driver(): LlmProvider
     {
-        return LLMPort::driver($this->driver);
+        return LlmPort::driver($this->driver);
     }
 }

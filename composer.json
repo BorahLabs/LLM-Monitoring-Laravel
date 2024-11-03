@@ -37,13 +37,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Borah\\LLMMonitoring\\": "src/",
-            "Borah\\LLMMonitoring\\Database\\Factories\\": "database/factories/"
+            "Borah\\LlmMonitoring\\": "src/",
+            "Borah\\LlmMonitoring\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Borah\\LLMMonitoring\\Tests\\": "tests/",
+            "Borah\\LlmMonitoring\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -76,10 +76,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Borah\\LLMMonitoring\\LLMMonitoringServiceProvider"
+                "Borah\\LlmMonitoring\\LlmMonitoringServiceProvider"
             ],
             "aliases": {
-                "LLMMonitoring": "Borah\\LLMMonitoring\\Facades\\LLMMonitoring"
+                "LlmMonitoring": "Borah\\LlmMonitoring\\Facades\\LlmMonitoring"
             }
         }
     },
