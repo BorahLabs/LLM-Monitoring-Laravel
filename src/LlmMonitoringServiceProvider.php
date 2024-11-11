@@ -16,9 +16,10 @@ class LlmMonitoringServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('llm-monitoring-laravel')
+            ->name('llm-monitoring')
             ->hasConfigFile()
             ->hasCommands(Install::class)
-            ->hasMigration('create_llm_port_calls_table');
+            ->hasViews('llm-monitoring')
+            ->hasMigrations('create_llm_port_calls_table', 'create_llm_call_evaluations_table');
     }
 }

@@ -15,6 +15,13 @@ class TestCase extends Orchestra
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'Borah\\LlmMonitoring\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
+
+
+        config([
+            'llmport.default' => 'openai',
+            'llmport.drivers.openai.default_model' => 'gpt-4o-mini',
+            'llmport.drivers.openai.key' => env('OPENAI_API_KEY'),
+        ]);
     }
 
     protected function getPackageProviders($app)

@@ -1,0 +1,29 @@
+<?php
+
+use App\Models\LlmPortCall;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('llm_call_evaluations', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignIdFor(LlmPortCall::class)->nullable()->index();
+            $table->string('metric');
+            $table->string('value');
+            $table->string('formatted_value');
+            $table->json('metadata');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('llm_call_evaluations');
+    }
+};

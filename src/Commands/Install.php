@@ -29,6 +29,7 @@ class Install extends Command
         $listenerPath = app_path('Listeners/LlmPort');
         $this->info('Creating LlmPort listener directory at '.$listenerPath);
         File::makeDirectory($listenerPath, recursive: true, force: true);
+        File::copy(__DIR__ . '/../Listeners/CreateLlmPortCall.php.stub', $listenerPath . '/CreateLlmPortCall.php');
 
         if (confirm('Do you want to create a monitoring Filament panel?', default: true)) {
             $this->addFilamentPanel();
