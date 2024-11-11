@@ -14,96 +14,90 @@ use InvalidArgumentException;
 
 abstract class BaseEvaluation
 {
-  /**
-   * @param EvaluationData $data
-   * @param ChatResponse|array<ChatResponse> $response
-   * @return EvaluationResult
-   */
-  protected abstract function evaluate(EvaluationData $data, mixed $response): EvaluationResult;
+    /**
+     * @param  ChatResponse|array<ChatResponse>  $response
+     */
+    abstract protected function evaluate(EvaluationData $data, mixed $response): EvaluationResult;
 
-  /**
-   * Useful for evaluations that need to be run on each chunk independently.
-   */
-  protected function shouldEvaluateEachChunkIndependently(): bool
-  {
-    return false;
-  }
-
-  /**
-   * Custom LLM driver to be used for this evaluation
-   *
-   * @return string|null
-   */
-  protected function driver(): ?string
-  {
-    return null;
-  }
-
-  /**
-   * Custom model to be used for this evaluation
-   *
-   * @return LlmModel|null
-   */
-  protected function model(): ?LlmModel
-  {
-    return null;
-  }
-
-  public abstract function identifier(): string;
-
-  public abstract function description(): string;
-
-  public abstract function systemPrompt(EvaluationData $data): string;
-
-  public abstract function userPrompt(EvaluationData $data): string;
-
-  public function requiresContextChunks(): bool
-  {
-    return false;
-  }
-
-  public function run(EvaluationData $data): EvaluationResult
-  {
-    if ($this->requiresContextChunks() && empty($data->contextChunks)) {
-      throw new InvalidArgumentException('Context chunks are required for this evaluation.');
+    /**
+     * Useful for evaluations that need to be run on each chunk independently.
+     */
+    protected function shouldEvaluateEachChunkIndependently(): bool
+    {
+        return false;
     }
 
-    $driver = LLMPort::driver($this->driver() ?? config('llm-monitoring.llmport.driver', config('llmport.default')));
-    if ($this->model()) {
-      $driver->using($this->model());
-    } else if ($model = config('llm-monitoring.llmport.model')) {
-      $driver->using($model);
+    /**
+     * Custom LLM driver to be used for this evaluation
+     */
+    protected function driver(): ?string
+    {
+        return null;
     }
 
-    if ($this->shouldEvaluateEachChunkIndependently()) {
-      $responses = [];
-      foreach ($data->contextChunks as $chunk) {
-        $chunkEvaluationData = new EvaluationData(
-          query: $data->query,
-          response: $data->response,
-          contextChunks: [$chunk],
-        );
+    /**
+     * Custom model to be used for this evaluation
+     */
+    protected function model(): ?LlmModel
+    {
+        return null;
+    }
 
-        $responses[] = $driver->chat(new ChatRequest(
-          messages: [
-            new ChatMessage(role: MessageRole::System, content: $this->systemPrompt($chunkEvaluationData)),
-            new ChatMessage(role: MessageRole::User, content: $this->userPrompt($chunkEvaluationData)),
-          ],
-          temperature: 0.3,
+    abstract public function identifier(): string;
+
+    abstract public function description(): string;
+
+    abstract public function systemPrompt(EvaluationData $data): string;
+
+    abstract public function userPrompt(EvaluationData $data): string;
+
+    public function requiresContextChunks(): bool
+    {
+        return false;
+    }
+
+    public function run(EvaluationData $data): EvaluationResult
+    {
+        if ($this->requiresContextChunks() && empty($data->contextChunks)) {
+            throw new InvalidArgumentException('Context chunks are required for this evaluation.');
+        }
+
+        $driver = LLMPort::driver($this->driver() ?? config('llm-monitoring.llmport.driver', config('llmport.default')));
+        if ($this->model()) {
+            $driver->using($this->model());
+        } elseif ($model = config('llm-monitoring.llmport.model')) {
+            $driver->using($model);
+        }
+
+        if ($this->shouldEvaluateEachChunkIndependently()) {
+            $responses = [];
+            foreach ($data->contextChunks as $chunk) {
+                $chunkEvaluationData = new EvaluationData(
+                    query: $data->query,
+                    response: $data->response,
+                    contextChunks: [$chunk],
+                );
+
+                $responses[] = $driver->chat(new ChatRequest(
+                    messages: [
+                        new ChatMessage(role: MessageRole::System, content: $this->systemPrompt($chunkEvaluationData)),
+                        new ChatMessage(role: MessageRole::User, content: $this->userPrompt($chunkEvaluationData)),
+                    ],
+                    temperature: 0.3,
+                ));
+            }
+
+            return $this->evaluate($data, $responses);
+        }
+
+        $response = $driver->chat(new ChatRequest(
+            messages: [
+                new ChatMessage(role: MessageRole::System, content: $this->systemPrompt($data)),
+                new ChatMessage(role: MessageRole::User, content: $this->userPrompt($data)),
+            ],
+            temperature: 0.3,
         ));
-      }
 
-      return $this->evaluate($data, $responses);
+        return $this->evaluate($data, $response);
     }
-
-    $response = $driver->chat(new ChatRequest(
-      messages: [
-        new ChatMessage(role: MessageRole::System, content: $this->systemPrompt($data)),
-        new ChatMessage(role: MessageRole::User, content: $this->userPrompt($data)),
-      ],
-      temperature: 0.3,
-    ));
-
-    return $this->evaluate($data, $response);
-  }
 }

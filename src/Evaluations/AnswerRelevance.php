@@ -8,44 +8,42 @@ use InvalidArgumentException;
 
 class AnswerRelevance extends BaseEvaluation
 {
-  public const MAX_SCORE = 3;
+    public const MAX_SCORE = 3;
 
-  /**
-   * @param EvaluationData $data
-   * @param ChatResponse $response
-   * @return EvaluationResult
-   */
-  protected function evaluate(EvaluationData $data, mixed $response): EvaluationResult
-  {
-    if (!is_numeric($response->content[0])) {
-      throw new InvalidArgumentException('Answer relevance evaluation response is not numeric.');
+    /**
+     * @param  ChatResponse  $response
+     */
+    protected function evaluate(EvaluationData $data, mixed $response): EvaluationResult
+    {
+        if (! is_numeric($response->content[0])) {
+            throw new InvalidArgumentException('Answer relevance evaluation response is not numeric.');
+        }
+
+        $total = intval($response->content[0]);
+
+        return new EvaluationResult(
+            value: $total / self::MAX_SCORE,
+            formattedValue: number_format($total / self::MAX_SCORE * 100, 2).'%',
+        );
     }
 
-    $total = intval($response->content[0]);
+    public function systemPrompt(EvaluationData $data): string
+    {
+        return view('llm-monitoring::answer-relevance.system', $data->toArray())->render();
+    }
 
-    return new EvaluationResult(
-      value: $total / self::MAX_SCORE,
-      formattedValue: number_format($total / self::MAX_SCORE * 100, 2).'%',
-    );
-  }
+    public function userPrompt(EvaluationData $data): string
+    {
+        return view('llm-monitoring::answer-relevance.user', $data->toArray())->render();
+    }
 
-  public function systemPrompt(EvaluationData $data): string
-  {
-    return view('llm-monitoring::answer-relevance.system', $data->toArray())->render();
-  }
+    public function identifier(): string
+    {
+        return 'answer_relevance';
+    }
 
-  public function userPrompt(EvaluationData $data): string
-  {
-    return view('llm-monitoring::answer-relevance.user', $data->toArray())->render();
-  }
-
-  public function identifier(): string
-  {
-    return 'answer_relevance';
-  }
-
-  public function description(): string
-  {
-    return 'Evaluates how relevant the answer is to the question.';
-  }
+    public function description(): string
+    {
+        return 'Evaluates how relevant the answer is to the question.';
+    }
 }

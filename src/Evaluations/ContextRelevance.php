@@ -8,57 +8,55 @@ use InvalidArgumentException;
 
 class ContextRelevance extends BaseEvaluation
 {
-  public const MAX_SCORE = 3;
+    public const MAX_SCORE = 3;
 
-  protected function shouldEvaluateEachChunkIndependently(): bool
-  {
-    return true;
-  }
-
-  /**
-   * @param EvaluationData $data
-   * @param array<ChatResponse> $responses
-   * @return EvaluationResult
-   */
-  protected function evaluate(EvaluationData $data, mixed $responses): EvaluationResult
-  {
-    $total = 0;
-    foreach ($responses as $response) {
-      if (!is_numeric($response->content[0])) {
-        throw new InvalidArgumentException('Context relevance evaluation response is not numeric.');
-      }
-
-      $total += intval($response->content[0]);
+    protected function shouldEvaluateEachChunkIndependently(): bool
+    {
+        return true;
     }
 
-    return new EvaluationResult(
-      value: $total / (count($responses) * self::MAX_SCORE),
-      formattedValue: number_format($total / (count($responses) * self::MAX_SCORE) * 100, 2).'%',
-    );
-  }
+    /**
+     * @param  array<ChatResponse>  $responses
+     */
+    protected function evaluate(EvaluationData $data, mixed $responses): EvaluationResult
+    {
+        $total = 0;
+        foreach ($responses as $response) {
+            if (! is_numeric($response->content[0])) {
+                throw new InvalidArgumentException('Context relevance evaluation response is not numeric.');
+            }
 
-  public function systemPrompt(EvaluationData $data): string
-  {
-    return view('llm-monitoring::context-relevance.system', $data->toArray())->render();
-  }
+            $total += intval($response->content[0]);
+        }
 
-  public function userPrompt(EvaluationData $data): string
-  {
-    return view('llm-monitoring::context-relevance.user', $data->toArray())->render();
-  }
+        return new EvaluationResult(
+            value: $total / (count($responses) * self::MAX_SCORE),
+            formattedValue: number_format($total / (count($responses) * self::MAX_SCORE) * 100, 2).'%',
+        );
+    }
 
-  public function requiresContextChunks(): bool
-  {
-    return true;
-  }
+    public function systemPrompt(EvaluationData $data): string
+    {
+        return view('llm-monitoring::context-relevance.system', $data->toArray())->render();
+    }
 
-  public function identifier(): string
-  {
-    return 'context_relevance';
-  }
+    public function userPrompt(EvaluationData $data): string
+    {
+        return view('llm-monitoring::context-relevance.user', $data->toArray())->render();
+    }
 
-  public function description(): string
-  {
-    return 'Evaluates how relevant each context chunk is to the question. The average score is used. For example, a score of 75% means that 75% of the context chunks were relevant to the question.';
-  }
+    public function requiresContextChunks(): bool
+    {
+        return true;
+    }
+
+    public function identifier(): string
+    {
+        return 'context_relevance';
+    }
+
+    public function description(): string
+    {
+        return 'Evaluates how relevant each context chunk is to the question. The average score is used. For example, a score of 75% means that 75% of the context chunks were relevant to the question.';
+    }
 }

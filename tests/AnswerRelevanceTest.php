@@ -4,7 +4,7 @@ use Borah\LlmMonitoring\Evaluations\AnswerRelevance;
 use Borah\LlmMonitoring\ValueObjects\EvaluationData;
 
 test('can be called without chunks', function () {
-    $evaluation = new AnswerRelevance();
+    $evaluation = new AnswerRelevance;
     expect($evaluation->requiresContextChunks())->toBeFalse();
 
     $data = new EvaluationData(
@@ -21,7 +21,7 @@ test('evaluate answer relevance for relevant query', function () {
         response: 'The capital of France is Paris.',
     );
 
-    $evaluation = new AnswerRelevance();
+    $evaluation = new AnswerRelevance;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBe(1);
@@ -34,7 +34,7 @@ test('evaluate answer relevance for slightly irrelevant', function () {
         response: 'The capital of France is Paris.',
     );
 
-    $evaluation = new AnswerRelevance();
+    $evaluation = new AnswerRelevance;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBeLessThan(1);
@@ -46,7 +46,7 @@ test('evaluate context relevance for irrelevant query', function () {
         response: 'I like croissants',
     );
 
-    $evaluation = new AnswerRelevance();
+    $evaluation = new AnswerRelevance;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBe(0);
@@ -58,7 +58,7 @@ test('uses the right prompts', function () {
         response: 'The capital of France is Paris.',
     );
 
-    $evaluation = new AnswerRelevance();
+    $evaluation = new AnswerRelevance;
 
     $systemPrompt = $evaluation->systemPrompt($data);
     $userPrompt = $evaluation->userPrompt($data);

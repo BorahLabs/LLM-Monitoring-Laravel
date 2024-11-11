@@ -4,7 +4,7 @@ use Borah\LlmMonitoring\Evaluations\ContextRelevanceChainOfThought;
 use Borah\LlmMonitoring\ValueObjects\EvaluationData;
 
 test('cannot be called without chunks', function () {
-    $evaluation = new ContextRelevanceChainOfThought();
+    $evaluation = new ContextRelevanceChainOfThought;
     expect($evaluation->requiresContextChunks())->toBeTrue();
 
     $data = new EvaluationData(
@@ -24,7 +24,7 @@ test('evaluate context relevance for relevant query', function () {
         ],
     );
 
-    $evaluation = new ContextRelevanceChainOfThought();
+    $evaluation = new ContextRelevanceChainOfThought;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBe(1);
@@ -41,7 +41,7 @@ test('evaluate context relevance for slightly irrelevant query', function () {
         ],
     );
 
-    $evaluation = new ContextRelevanceChainOfThought();
+    $evaluation = new ContextRelevanceChainOfThought;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBeLessThan(1);
@@ -56,7 +56,7 @@ test('evaluate context relevance for irrelevant query', function () {
         ],
     );
 
-    $evaluation = new ContextRelevanceChainOfThought();
+    $evaluation = new ContextRelevanceChainOfThought;
     $result = $evaluation->run($data);
 
     expect($result->value)->toBe(0);
@@ -72,7 +72,7 @@ test('uses the right prompts', function () {
         ],
     );
 
-    $evaluation = new ContextRelevanceChainOfThought();
+    $evaluation = new ContextRelevanceChainOfThought;
 
     $systemPrompt = $evaluation->systemPrompt($data);
     $userPrompt = $evaluation->userPrompt($data);

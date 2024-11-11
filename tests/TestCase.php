@@ -16,7 +16,6 @@ class TestCase extends Orchestra
             fn (string $modelName) => 'Borah\\LlmMonitoring\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-
         config([
             'llmport.default' => 'openai',
             'llmport.drivers.openai.default_model' => 'gpt-4o-mini',
