@@ -36,6 +36,9 @@ class CreateLlmPortCall implements ShouldQueue
             'processing_time_in_ms' => $event->response->usage?->processingTimeInMs,
             'input_tokens' => $event->response->usage?->inputTokens,
             'output_tokens' => $event->response->usage?->outputTokens,
+            'callable_id' => null,
+            'callable_type' => null,
+            'metadata' => $event->metadata,
         ]);
     }
 }

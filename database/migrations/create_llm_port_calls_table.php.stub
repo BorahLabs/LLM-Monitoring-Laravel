@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('llm_port_calls', function (Blueprint $table) {
             $table->id();
 
+            $table->string('type')->default('completion')->index();
             $table->string('driver');
             $table->string('model_name');
             $table->json('messages');
@@ -23,6 +24,9 @@ return new class extends Migration
             $table->float('top_p')->nullable();
             $table->float('frequency_penalty')->nullable();
             $table->string('finish_reason')->nullable();
+
+            $table->nullableMorphs('callable');
+            $table->json('metadata')->nullable();
 
             $table->timestamps();
         });

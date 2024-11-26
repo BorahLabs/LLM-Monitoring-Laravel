@@ -10,7 +10,6 @@ use Borah\LLMPort\ValueObjects\ChatMessage;
 use Borah\LLMPort\ValueObjects\ChatRequest;
 use Borah\LLMPort\ValueObjects\ChatResponse;
 use Borah\LLMPort\ValueObjects\LlmModel;
-use InvalidArgumentException;
 
 abstract class BaseEvaluation
 {
@@ -59,7 +58,11 @@ abstract class BaseEvaluation
     public function run(EvaluationData $data): EvaluationResult
     {
         if ($this->requiresContextChunks() && empty($data->contextChunks)) {
-            throw new InvalidArgumentException('Context chunks are required for this evaluation.');
+            if ($this->shouldEvaluateEachChunkIndependently()) {
+                return $this->evaluate($data, []);
+            }
+
+            return $this->evaluate($data, new ChatResponse(id: '', content: '', finishReason: 'unknown', usage: null));
         }
 
         $driver = LLMPort::driver($this->driver() ?? config('llm-monitoring.llmport.driver', config('llmport.default')));

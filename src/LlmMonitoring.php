@@ -20,22 +20,23 @@ class LlmMonitoring
 
     public function dispatch(EvaluationData $data): void
     {
-        // Lottery::odds(config('llm-monitoring.probability'), 100)
-        //   ->winner(function () use ($data) {
-        dispatch(function () use ($data) {
-            $evaluations = $this->evaluate($data);
+        Lottery::odds(config('llm-monitoring.probability'), 100)
+            ->winner(function () use ($data) {
+                dispatch(function () use ($data) {
+                    $evaluations = $this->evaluate($data);
 
-            foreach ($evaluations as $identifier => $evaluation) {
-                LlmCallEvaluation::query()->create([
-                    'metric' => $identifier,
-                    'value' => $evaluation->value,
-                    'formatted_value' => $evaluation->formattedValue,
-                    'metadata' => $evaluation->metadata,
-                    'llm_call_id' => $data->externalId,
-                ]);
-            }
-        });
-        // });
+                    foreach ($evaluations as $identifier => $evaluation) {
+                        LlmCallEvaluation::query()->create([
+                            'metric' => $identifier,
+                            'value' => $evaluation->value,
+                            'formatted_value' => $evaluation->formattedValue,
+                            'metadata' => $evaluation->metadata,
+                            'llm_port_call_id' => $data->externalId,
+                        ]);
+                    }
+                });
+            })
+            ->choose();
     }
 
     /**

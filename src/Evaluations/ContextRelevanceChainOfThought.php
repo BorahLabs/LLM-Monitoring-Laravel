@@ -31,8 +31,8 @@ class ContextRelevanceChainOfThought extends BaseEvaluation
         }
 
         return new EvaluationResult(
-            value: $total / (count($responses) * self::MAX_SCORE),
-            formattedValue: number_format($total / (count($responses) * self::MAX_SCORE) * 100, 2).'%',
+            value: count($responses) > 0 ? $total / (count($responses) * self::MAX_SCORE) : 0,
+            formattedValue: number_format(count($responses) > 0 ? $total / (count($responses) * self::MAX_SCORE) * 100 : 0, 2).'%',
         );
     }
 
