@@ -1,12 +1,15 @@
 <?php
 
-namespace {namespace}\LlmMonitoring\Widgets;
+namespace App\Filament\LlmMonitoring\Widgets;
 
-use App\Models\LlmCallEvaluation;
+use Borah\LlmMonitoring\Models\LlmCallEvaluation;
 use App\Models\LlmPortCall;
+use Borah\LlmMonitoring\Evaluations\BaseEvaluation;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Flowframe\Trend\Trend;
+use Flowframe\Trend\TrendValue;
 use Illuminate\Database\Eloquent\Builder;
 
 class LlmModelPerformance extends ChartWidget
@@ -19,39 +22,45 @@ class LlmModelPerformance extends ChartWidget
 
     protected function getData(): array
     {
-        $startDate = $this->filters['startDate'] ?? null;
-        $endDate = $this->filters['endDate'] ?? null;
-
-        // Get all models used
-        $modelsQuery = LlmPortCall::query()
-            ->selectRaw('DISTINCT model_name')
-            ->when($startDate, fn (Builder $query) => $query->whereDate('created_at', '>=', $startDate))
-            ->when($endDate, fn (Builder $query) => $query->whereDate('created_at', '<=', $endDate));
-            
-        $models = $modelsQuery->pluck('model_name')->toArray();
+        $startDate = now()->parse($this->filters['startDate'] ?? now()->subMonth());
+        $endDate = now()->parse($this->filters['endDate'] ?? now());
 
         // Get average answer relevance scores by model
         $datasets = [];
-        $labels = ['Answer Relevance'];
-        
-        foreach ($models as $model) {
-            $avgScore = LlmCallEvaluation::query()
-                ->join('llm_port_calls', 'llm_call_evaluations.llm_port_call_id', '=', 'llm_port_calls.id')
-                ->where('llm_port_calls.model_name', $model)
-                ->where('llm_call_evaluations.metric', 'answer-relevance')
-                ->when($startDate, fn (Builder $query) => $query->whereDate('llm_call_evaluations.created_at', '>=', $startDate))
-                ->when($endDate, fn (Builder $query) => $query->whereDate('llm_call_evaluations.created_at', '<=', $endDate))
-                ->avg('llm_call_evaluations.value');
+        $evaluations = collect(config('llm-monitoring.evaluations'))->map(fn (string $e) => new $e);
+        $labels = $evaluations->map(fn (BaseEvaluation $evaluation) => str(class_basename($evaluation))->snake()->title()->replace('_', ' '))->toArray();
 
+        $rawLabels = [];
+        // some nice pastel colors
+        $colors = [
+            '#FFB6C1',
+            '#87CEEB',
+            '#98FB98',
+            '#DDA0DD',
+            '#F0E68C',
+        ];
+        foreach ($evaluations as $i => $evaluation) {
+            $data = Trend::query(
+                LlmCallEvaluation::query()
+                    ->whereIn('llm_port_call_id', gofioplatform()->llmPortCalls()->select('id'))
+                    ->where('metric', $evaluation->identifier())
+            )
+                ->between($startDate, $endDate)
+                ->perDay()
+                ->average('value');
+
+            $rawLabels = $data->map(fn (TrendValue $value) => $value->date);
             $datasets[] = [
-                'label' => $model,
-                'data' => [$avgScore ? (float)$avgScore * 100 : 0],
+                'label' => $labels[$i],
+                'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
+                'backgroundColor' => $colors[$i % count($colors)],
+                'borderColor' => $colors[$i % count($colors)],
             ];
         }
 
         return [
             'datasets' => $datasets,
-            'labels' => $labels,
+            'labels' => $rawLabels,
         ];
     }
 
@@ -61,9 +70,9 @@ class LlmModelPerformance extends ChartWidget
             'scales' => [
                 'y' => [
                     'min' => 0,
-                    'max' => 100,
+                    'max' => 1,
                     'ticks' => [
-                        'callback' => '(value) => value + "%"',
+                        'callback' => '(value) => (value * 100).toFixed(2) + "%"',
                     ],
                 ],
             ],
