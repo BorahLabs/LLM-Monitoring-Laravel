@@ -34,7 +34,7 @@ class LlmMonitoring
                             'llm_port_call_id' => $data->externalId,
                         ]);
                     }
-                });
+                })->onQueue(config('llm-monitoring.queue'));
             })
             ->choose();
     }

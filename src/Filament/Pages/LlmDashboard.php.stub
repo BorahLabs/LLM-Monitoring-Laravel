@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace {namespace}\Pages;
 
 use App\Filament\LlmMonitoring\Widgets\LlmCallsChart;
 use App\Filament\LlmMonitoring\Widgets\LlmStats;
 use App\Filament\LlmMonitoring\Widgets\LlmTokenConsumption;
+use App\Filament\LlmMonitoring\Widgets\LlmModelPerformance;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard as Page;
@@ -14,15 +15,17 @@ class LlmDashboard extends Page
 {
     use HasFiltersForm;
 
-    protected static string $routePath = '/llm-token-usage';
+    protected static string $routePath = '/llm-monitoring';
 
     protected static ?string $navigationGroup = 'LLM Monitoring';
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationLabel = 'Token Usage';
+    protected static ?string $navigationLabel = 'Dashboard';
 
-    protected ?string $heading = 'Token Usage';
+    protected ?string $heading = 'LLM Monitoring Dashboard';
+
+    protected static ?int $navigationSort = 100;
 
     public function mount(): void
     {
@@ -36,19 +39,28 @@ class LlmDashboard extends Page
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\DatePicker::make('startDate')
+                            ->label('Start Date')
                             ->default(now()->subDays(30)),
-                        Forms\Components\DatePicker::make('endDate'),
+                        Forms\Components\DatePicker::make('endDate')
+                            ->label('End Date'),
                     ])
                     ->columns(3),
             ]);
     }
 
+    /**
+     * Get the dashboard widgets.
+     * 
+     * Override this method in your extended class to add custom widgets.
+     */
     public function getWidgets(): array
     {
         return [
             LlmStats::class,
             LlmCallsChart::class,
             LlmTokenConsumption::class,
+            LlmModelPerformance::class,
+            // Add your custom widgets here
         ];
     }
 }

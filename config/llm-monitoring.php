@@ -10,4 +10,5 @@ return [
         \Borah\LlmMonitoring\Evaluations\AnswerRelevance::class,
         \Borah\LlmMonitoring\Evaluations\ContextRelevanceChainOfThought::class,
     ],
+    'queue' => 'monitoring',
 ];

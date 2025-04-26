@@ -1,0 +1,77 @@
+<?php
+
+namespace {namespace}\LlmMonitoring\Widgets;
+
+use App\Models\LlmCallEvaluation;
+use App\Models\LlmPortCall;
+use Filament\Support\RawJs;
+use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Database\Eloquent\Builder;
+
+class LlmModelPerformance extends ChartWidget
+{
+    use InteractsWithPageFilters;
+
+    protected static ?int $sort = 4;
+
+    protected static ?string $heading = 'LLM Model Performance';
+
+    protected function getData(): array
+    {
+        $startDate = $this->filters['startDate'] ?? null;
+        $endDate = $this->filters['endDate'] ?? null;
+
+        // Get all models used
+        $modelsQuery = LlmPortCall::query()
+            ->selectRaw('DISTINCT model_name')
+            ->when($startDate, fn (Builder $query) => $query->whereDate('created_at', '>=', $startDate))
+            ->when($endDate, fn (Builder $query) => $query->whereDate('created_at', '<=', $endDate));
+            
+        $models = $modelsQuery->pluck('model_name')->toArray();
+
+        // Get average answer relevance scores by model
+        $datasets = [];
+        $labels = ['Answer Relevance'];
+        
+        foreach ($models as $model) {
+            $avgScore = LlmCallEvaluation::query()
+                ->join('llm_port_calls', 'llm_call_evaluations.llm_port_call_id', '=', 'llm_port_calls.id')
+                ->where('llm_port_calls.model_name', $model)
+                ->where('llm_call_evaluations.metric', 'answer-relevance')
+                ->when($startDate, fn (Builder $query) => $query->whereDate('llm_call_evaluations.created_at', '>=', $startDate))
+                ->when($endDate, fn (Builder $query) => $query->whereDate('llm_call_evaluations.created_at', '<=', $endDate))
+                ->avg('llm_call_evaluations.value');
+
+            $datasets[] = [
+                'label' => $model,
+                'data' => [$avgScore ? (float)$avgScore * 100 : 0],
+            ];
+        }
+
+        return [
+            'datasets' => $datasets,
+            'labels' => $labels,
+        ];
+    }
+
+    protected function getOptions(): array|RawJs|null
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'min' => 0,
+                    'max' => 100,
+                    'ticks' => [
+                        'callback' => '(value) => value + "%"',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    protected function getType(): string
+    {
+        return 'bar';
+    }
+}

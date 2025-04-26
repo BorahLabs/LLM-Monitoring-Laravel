@@ -2,7 +2,9 @@
 
 namespace App\Listeners\LlmPort;
 
-use App\Models\LlmPortCall;
+use Borah\LlmMonitoring\Models\LlmPortCall;
+use Borah\LlmMonitoring\Facades\LlmMonitoring;
+use Borah\LlmMonitoring\ValueObjects\EvaluationData;
 use Borah\LlmPort\Events\LlmChatResponseReceived;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -24,7 +26,8 @@ class CreateLlmPortCall implements ShouldQueue
      */
     public function handle(LlmChatResponseReceived $event): void
     {
-        LlmPortCall::create([
+        // Create the record of the LLM call
+        $llmCall = LlmPortCall::create([
             'driver' => $event->driver,
             'model_name' => $event->model->name,
             'messages' => $event->request->messages,
@@ -36,9 +39,29 @@ class CreateLlmPortCall implements ShouldQueue
             'processing_time_in_ms' => $event->response->usage?->processingTimeInMs,
             'input_tokens' => $event->response->usage?->inputTokens,
             'output_tokens' => $event->response->usage?->outputTokens,
-            'callable_id' => null,
-            'callable_type' => null,
+            'callable_id' => $event->metadata['callable_id'] ?? null,
+            'callable_type' => $event->metadata['callable_type'] ?? null,
             'metadata' => $event->metadata,
         ]);
+
+        // Extract the user query
+        $userMessage = collect($event->request->messages)
+            ->firstWhere('role', 'user');
+
+        $userQuery = $userMessage['content'] ?? '';
+
+        if (isset($event->metadata['evaluating'])) {
+            return;
+        }
+
+        // Dispatch evaluations for this call
+        if ($userQuery) {
+            LlmMonitoring::dispatch(new EvaluationData(
+                query: $userQuery,
+                response: $event->response->content,
+                contextChunks: $event->metadata['context_chunks'] ?? null,
+                externalId: $llmCall->id
+            ));
+        }
     }
 }
