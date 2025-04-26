@@ -18,6 +18,8 @@ class LlmModelPerformance extends ChartWidget
 
     protected static ?int $sort = 4;
 
+    protected static bool $isDiscovered = false;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'LLM Model Performance';

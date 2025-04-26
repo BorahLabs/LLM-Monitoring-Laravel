@@ -15,6 +15,8 @@ class LlmCallsChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
+    protected static bool $isDiscovered = false;
+
     protected static ?string $heading = 'Llm Calls';
 
     protected function getData(): array

@@ -15,6 +15,8 @@ class LlmTokenConsumption extends ChartWidget
 
     protected static ?int $sort = 3;
 
+    protected static bool $isDiscovered = false;
+
     protected static ?string $heading = 'Llm Token Consumption';
 
     protected function getData(): array
